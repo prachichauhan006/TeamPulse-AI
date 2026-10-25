@@ -1,0 +1,1 @@
+"""TeamPulse AI backend application."""
