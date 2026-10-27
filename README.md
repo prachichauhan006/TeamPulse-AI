@@ -11,7 +11,7 @@ TeamPulse AI is a full-stack, multi-tenant team workspace for projects, dependen
 - TanStack Query server state plus explicit authentication/workspace context
 - Registration, login, logout, refresh-token rotation, and session-expired messaging
 - Workspace switching, creation, rename, owner deletion, member administration, and role-aware controls
-- Project create/edit/delete and status management
+- Project create/edit/delete and status management  
 - Task list and accessible Kanban views, filters, assignment, priorities, due dates, and role-aware editing
 - dnd-kit pointer/keyboard drag-and-drop with identifiable drop columns, drag overlay, optimistic status updates, rollback, and dependent-risk invalidation
 - Task dependencies, cycle-safe API integration, deterministic risk badges, and human-readable risk reasons
