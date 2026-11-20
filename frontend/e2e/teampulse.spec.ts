@@ -1,7 +1,10 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { test, expect, request as playwrightRequest, type APIRequestContext, type Page } from "@playwright/test";
 
-const API_BASE_URL = process.env.E2E_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1";
+const API_BASE_URL = new URL(
+  "/api/v1",
+  process.env.E2E_API_BASE_URL ?? "http://127.0.0.1:8005",
+).toString().replace(/\/$/, "");
 type Tokens = { access_token: string; refresh_token: string };
 type Identity = { email: string; password: string; tokens: Tokens };
 type Workspace = { id: string; name: string };
@@ -66,7 +69,7 @@ test("registration, logout, and login use the real session flow", async ({ page 
   await page.getByLabel("Full name").fill("Playwright Registration");
   await page.getByLabel("Email address").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByLabel("Confirm password").fill(password);
+  await page.getByLabel("Confirm password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByRole("heading", { name: "Welcome to TeamPulse AI" })).toBeVisible();
   await page.getByRole("button", { name: "Sign out" }).click();
