@@ -56,7 +56,7 @@ jobs:
       POSTGRES_DB: teampulse_e2e
       POSTGRES_USER: teampulse_e2e
       CORS_ORIGINS: http://127.0.0.1:5173,http://localhost:5173
-      E2E_BASE_URL: http://127.0.0.1:5173
+      VITE_API_BASE_URL: http://127.0.0.1:8005/api/v1
       E2E_SKIP_WEBSERVER: "1"
     steps:
       - uses: actions/checkout@v4
@@ -73,22 +73,39 @@ jobs:
           echo "JWT_SECRET_KEY=$(openssl rand -hex 48)" >> "$GITHUB_ENV"
       - name: Start PostgreSQL, Redis, backend, and Celery
         run: docker compose up -d --build backend celery-worker
-      - name: Configure browser-facing backend URL from Compose
-        run: |
-          set -euo pipefail
-          BACKEND_PORT="$(docker compose port backend 8000 | sed 's/.*://')"
-          test -n "$BACKEND_PORT"
-          echo "BACKEND_PORT=$BACKEND_PORT" >> "$GITHUB_ENV"
-          echo "VITE_API_BASE_URL=http://127.0.0.1:${BACKEND_PORT}/api/v1" >> "$GITHUB_ENV"
-          echo "E2E_API_BASE_URL=http://127.0.0.1:${BACKEND_PORT}/api/v1" >> "$GITHUB_ENV"
       - name: Apply database migrations
         run: docker compose run --rm backend alembic upgrade head
       - name: Start frontend
         run: docker compose up -d --build frontend
+      - name: Configure Playwright URLs from Compose
+        run: |
+          set -euo pipefail
+          BACKEND_PORT="$(docker compose port backend 8000 | sed 's/.*://')"
+          FRONTEND_PORT="$(docker compose port frontend 5173 | sed 's/.*://')"
+          test -n "$BACKEND_PORT"
+          test -n "$FRONTEND_PORT"
+          echo "E2E_API_BASE_URL=http://127.0.0.1:${BACKEND_PORT}/api/v1" >> "$GITHUB_ENV"
+          echo "E2E_BASE_URL=http://127.0.0.1:${FRONTEND_PORT}" >> "$GITHUB_ENV"
       - name: Wait for browser-facing services
         run: |
-          curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-connrefused "http://127.0.0.1:${BACKEND_PORT}/health"
-          curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-connrefused http://127.0.0.1:5173/ > /dev/null
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            if docker compose exec -T backend python -c "
+          import json, urllib.request
+          response = urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)
+          payload = json.load(response)
+          assert payload.get('status') == 'ok', payload
+          print(payload)
+          "; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "Backend health check failed after 30 attempts"
+              exit 1
+            fi
+            sleep 2
+          done
+          curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-connrefused "${E2E_BASE_URL}/" > /dev/null
       - name: Install E2E dependencies and Chromium
         working-directory: frontend
         run: npm ci && npx playwright install --with-deps chromium
