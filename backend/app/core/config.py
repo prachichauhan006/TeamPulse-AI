@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
+    login_rate_limit_per_minute: int = Field(default=5, ge=1)
 
     cors_origins: str = "http://localhost:5173"
     trust_proxy_headers: bool = False

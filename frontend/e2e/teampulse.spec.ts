@@ -94,10 +94,11 @@ test("workspace to project to task workflow", async ({ page }) => {
   await page.getByRole("button", { name: "Create project" }).click();
   await page.getByRole("link", { name: "Tasks", exact: true }).click();
   await page.getByRole("button", { name: "New task" }).click();
-  await page.getByLabel("Project", { exact: true }).selectOption({ label: "UI Launch Project" });
-  await page.getByLabel("Task title").fill("UI acceptance criteria");
-  await page.getByLabel("Description").fill("Verify the end-to-end task flow.");
-  await page.getByRole("button", { name: "Create task" }).click();
+  const createTaskDialog = page.getByRole("dialog", { name: "Create task" });
+  await createTaskDialog.getByLabel("Project", { exact: true }).selectOption({ label: "UI Launch Project" });
+  await createTaskDialog.getByLabel("Task title").fill("UI acceptance criteria");
+  await createTaskDialog.getByLabel("Description").fill("Verify the end-to-end task flow.");
+  await createTaskDialog.getByRole("button", { name: "Create task", exact: true }).click();
   await expect(page.getByRole("link", { name: "UI acceptance criteria" })).toBeVisible();
 });
 

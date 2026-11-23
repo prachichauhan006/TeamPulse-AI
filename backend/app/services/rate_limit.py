@@ -12,7 +12,7 @@ from fastapi import Request
 
 from app.core.config import get_settings
 
-LOGIN_RATE_LIMIT = 5
+LOGIN_RATE_LIMIT = get_settings().login_rate_limit_per_minute
 AI_RATE_LIMIT = 10
 SEARCH_RATE_LIMIT = 30
 RATE_LIMIT_WINDOW_SECONDS = 60
