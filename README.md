@@ -22,7 +22,7 @@ TeamPulse AI is a full-stack, multi-tenant team workspace for projects, dependen
 - UTF-8 `.txt`/`.md` upload, indexing status, content download, and confirmed deletion
 - Search & Docs source tabs (All, Documents, Meeting notes, Tasks), typed result cards, and dismissible duplicate-task suggestions
 - Paginated OWNER/ADMIN audit activity
-- Loading, empty, error, permission, toast, mobile-navigation, and destructive-confirmation states
+- Loading, empty, error, permission, toast, mobile-navigation, and destructive-confirmation states   
 
 ### Backend and data
 
